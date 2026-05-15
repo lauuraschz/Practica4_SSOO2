@@ -1,0 +1,7 @@
+node_modules/
+.git/
+*.log
+checker_report.txt
+.env
+dist/
+coverage/

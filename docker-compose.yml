@@ -1,0 +1,87 @@
+# ============================================================================
+# SpotESIfy — Docker Compose
+# SSOO II · Escuela Superior de Informática · UCLM
+# ============================================================================
+# Un clon simplificado de Spotify con 4 servicios.
+# Levanta con: docker compose up -d
+# ============================================================================
+
+services:
+
+  # ── Nginx: Proxy inverso (puerta de entrada) ─────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: spotesify-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - web
+      - api
+    networks:
+      - frontend
+    restart: unless-stopped
+
+  # ── Web: Frontend (HTML/CSS/JS) ──────────────────────────────────────────
+  web:
+    build: ./web
+    container_name: spotesify-web
+    ports:
+      - "3000:3000"
+    networks:
+      - frontend
+    restart: unless-stopped
+
+  # ── API: Backend Express.js ──────────────────────────────────────────────
+  api:
+    build: ./api
+    container_name: spotesify-api
+    environment:
+      - PORT=5000
+      - REDIS_HOST=db
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=spotesify123
+      - MUSIC_DIR=/data/music
+    volumes:
+      - ./music:/music
+    networks:
+      - frontend
+    mem_limit: 15m
+    restart: unless-stopped
+
+  # ── DB: Redis (almacén de metadatos y playlists) ─────────────────────────
+  db:
+    image: redis:7-alpine
+    container_name: spotesify-db
+    command: redis-server --requirepass spotesify123
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend
+    restart: unless-stopped
+
+  # ── Worker: Recolector de métricas ───────────────────────────────────────
+  worker:
+    build: ./worker
+    container_name: spotesify-worker
+    environment:
+      - REDIS_HOST=db
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=spotesify123
+      - COLLECT_INTERVAL=3000
+    networks:
+      - backend
+    mem_limit: 10m
+    restart: unless-stopped
+
+# ── Redes ────────────────────────────────────────────────────────────────────
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+
+# ── Volúmenes ────────────────────────────────────────────────────────────────
+volumes:
+  redis_data:
