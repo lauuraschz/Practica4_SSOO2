@@ -1,0 +1,73 @@
+---
+- name: Automatización del Despliegue de SpotESIfy (Fase 2)
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    project_path: "/home/alumno/spotesify"
+
+  tasks:
+    - name: 1. Actualizar el gestor de paquetes APT
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: 2. Instalar dependencias del sistema operativo prerrequisito
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - git
+        state: present
+
+    - name: 3. Comprobar de forma idempotente si Docker está instalado
+      command: docker --version
+      register: docker_check
+      failed_when: false
+      changed_when: false
+
+    - name: 4. Instalar Docker y el plugin de Compose si no existen
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+      when: docker_check.rc != 0
+
+    - name: 5. Asegurar que el servicio de Docker está activo y habilitado en Systemd
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: 6. Sincronizar y levantar los servicios con Docker Compose (Build e Idempotencia)
+      become: false
+      command:
+        cmd: docker compose up -d --build
+        chdir: "{{ project_path }}"
+      register: compose_output
+      changed_when: "'Creating' in compose_output.stdout or 'Building' in compose_output.stdout"
+
+    - name: 7. Esperar a que la API complete el tick del Healthcheck del sistema
+      become: false
+      shell: "docker ps | grep spotesify-api"
+      register: docker_ps_output
+      until: '"healthy" in docker_ps_output.stdout'
+      retries: 12
+      delay: 5
+      changed_when: false
+
+    - name: 8. Verificar que la aplicación es accesible a través del Proxy (HTTP 200)
+      uri:
+        url: http://127.0.0.1:80
+        status_code: 200
+      register: web_check
+      until: web_check.status == 200
+      retries: 5
+      delay: 2

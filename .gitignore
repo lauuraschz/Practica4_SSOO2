@@ -1,7 +1,20 @@
-node_modules/
-.git/
-*.log
-checker_report.txt
+# Dependencias de Node
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Persistencia y bases de datos locales (Evita subir dumps de Redis)
+**/data/
+*.rdb
+*.dump
+
+# Variables de entorno secretas
 .env
-dist/
-coverage/
+.env.local
+
+# Archivos del Sistema Operativo / IDEs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

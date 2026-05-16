@@ -21,7 +21,7 @@ services:
       - api
     networks:
       - frontend
-    restart: unless-stopped
+    restart: always
 
   # ── Web: Frontend (HTML/CSS/JS) ──────────────────────────────────────────
   web:
@@ -31,24 +31,33 @@ services:
       - "3000:3000"
     networks:
       - frontend
-    restart: unless-stopped
+      - backend
+    restart: always
 
   # ── API: Backend Express.js ──────────────────────────────────────────────
   api:
     build: ./api
     container_name: spotesify-api
+    depends_on:
+        - db
     environment:
       - PORT=5000
       - REDIS_HOST=db
       - REDIS_PORT=6379
-      - REDIS_PASSWORD=spotesify123
+      - REDIS_PASS=spotesify123
       - MUSIC_DIR=/data/music
     volumes:
-      - ./music:/music
+      - ./music:/data/music
     networks:
       - frontend
-    mem_limit: 15m
-    restart: unless-stopped
+      - backend
+    mem_limit: 256M
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://127.0.0.1:5000/health"]
+        interval: 5s
+        timeout: 2s
+        retries: 3
+    restart: always
 
   # ── DB: Redis (almacén de metadatos y playlists) ─────────────────────────
   db:
@@ -59,7 +68,7 @@ services:
       - redis_data:/data
     networks:
       - backend
-    restart: unless-stopped
+    restart: always
 
   # ── Worker: Recolector de métricas ───────────────────────────────────────
   worker:
@@ -68,19 +77,17 @@ services:
     environment:
       - REDIS_HOST=db
       - REDIS_PORT=6379
-      - REDIS_PASSWORD=spotesify123
+      - REDIS_PASS=spotesify123
       - COLLECT_INTERVAL=3000
     networks:
       - backend
-    mem_limit: 10m
-    restart: unless-stopped
+    mem_limit: 128M
+    restart: always
 
 # ── Redes ────────────────────────────────────────────────────────────────────
 networks:
   frontend:
-    driver: bridge
   backend:
-    driver: bridge
 
 # ── Volúmenes ────────────────────────────────────────────────────────────────
 volumes:
