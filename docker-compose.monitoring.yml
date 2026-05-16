@@ -1,0 +1,51 @@
+# SpotESIfy — Stack de Observabilidad 
+# Uso: docker compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d 
+ 
+services: 
+  cadvisor: 
+    image: gcr.io/cadvisor/cadvisor:v0.49.1 
+    container_name: spotesify-cadvisor 
+    volumes: 
+      - /:/rootfs:ro 
+      - /var/run:/var/run:ro 
+      - /sys:/sys:ro 
+      - /var/lib/docker/:/var/lib/docker:ro 
+    ports: 
+      - "8081:8080" 
+    networks: 
+      - monitoring 
+    restart: unless-stopped 
+ 
+  prometheus: 
+    image: prom/prometheus:v2.51.0 
+    container_name: spotesify-prometheus 
+    volumes: 
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro 
+      - prometheus_data:/prometheus 
+    ports: 
+      - "9090:9090" 
+    networks: 
+      - monitoring 
+    restart: unless-stopped
+
+  grafana: 
+      image: grafana/grafana:10.4.1 
+      container_name: spotesify-grafana 
+      environment: 
+        - GF_SECURITY_ADMIN_USER=admin 
+        - GF_SECURITY_ADMIN_PASSWORD=admin 
+      volumes: 
+        - grafana_data:/var/lib/grafana 
+      ports: 
+        - "3001:3000" 
+      networks: 
+        - monitoring 
+      restart: unless-stopped 
+   
+  networks: 
+    monitoring: 
+      driver: bridge 
+   
+  volumes: 
+    prometheus_data: 
+    grafana_data: 
