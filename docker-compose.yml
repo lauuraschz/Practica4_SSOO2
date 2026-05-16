@@ -52,11 +52,6 @@ services:
       - frontend
       - backend
     mem_limit: 256M
-    healthcheck:
-        test: ["CMD", "curl", "-f", "http://127.0.0.1:5000/health"]
-        interval: 5s
-        timeout: 2s
-        retries: 3
     restart: always
 
   # ── DB: Redis (almacén de metadatos y playlists) ─────────────────────────
