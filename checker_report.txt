@@ -1,0 +1,34 @@
+[H[2J[3J
+[1m╔═══════════════════════════════════════════════════════════╗[0m
+[1m║   🎵 SpotESIfy — Checker de Progreso                    ║[0m
+[1m╚═══════════════════════════════════════════════════════════╝[0m
+
+  Máquina:  [0;36mspotesify-vm[0m    MAC: [0;36m08:00:27:86:64:62[0m
+  Fecha:    [0;36m2026-05-16 19:17:12[0m
+
+[1m─── Verificaciones ────────────────────────────────────────[0m
+
+  [0;32m✅ [E1][0m Web accesible a través del proxy
+     [0;36mFlag: 2a3c31a5dfc179de[0m
+  [0;32m✅ [E2][0m API conectada a la base de datos
+     [0;36mFlag: 725edaee80334762[0m
+  [0;32m✅ [E3][0m Catálogo de canciones accesible (5 canciones)
+     [0;36mFlag: 511c2b0f1c4c6c92[0m
+  [0;32m✅ [E4][0m Streaming de audio funcional
+     [0;36mFlag: 26a7c2cdfaa98e2b[0m
+  [0;32m✅ [E5][0m Contenedor API estable (0 reinicios)
+     [0;36mFlag: f52fe4e34252c33e[0m
+  [0;32m✅ [E6][0m Imagen optimizada (50MB, user: node)
+     [0;36mFlag: d16058c428ae1e9a[0m
+  [0;31m❌ [E7][0m Healthcheck no operativo (estado: unhealthy)
+  [0;32m✅ [E8][0m Worker estable (0 reinicios)
+     [0;36mFlag: f93efcc09e49af46[0m
+  [0;31m❌ [E9][0m Arranque no resiliente
+
+[1m═══════════════════════════════════════════════════════════[0m
+  Progreso: [██████████████████████████████░░░░░░░░░░] [1m7/9[0m
+
+  [1;33mCasi — quedan detalles por resolver.[0m
+
+  📄 Informe: [0;36m/home/alumno/checker_report.txt[0m
+
